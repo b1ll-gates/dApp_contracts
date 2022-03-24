@@ -1,0 +1,20 @@
+const NFT = artifacts.require("NFT");
+const Token = artifacts.require("NwBTC");
+const Market = artifacts.require("Market");
+const Stake = artifacts.require("Staking");
+
+const nwBTC = "0xF081200be1C9d0D2ce7a8735f15c77218EAaBd77";
+const nft = "0xef6722edba5bBEd8a49049539e8130616f51B484";
+
+module.exports = async function(deployer) {
+//  await deployer.deploy(NFT,nwBTC);
+//  const nft = await NFT.deployed()
+//  await deployer.deploy(Market, nwBTC , nft.address);
+//  const market = await Market.deployed()
+  await deployer.deploy(Stake, nwBTC , nft);
+  const stake = await Stake.deployed()
+
+  const contracts = { "token" : nwBTC, "nft" : nft, "stake" : stake.address };
+
+  console.log(`Contract addresses: ${ JSON.stringify( contracts , null ,2 ) }`);
+};
