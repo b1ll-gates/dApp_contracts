@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma abicoder v2;
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity >=0.6.0 <0.8.11;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -21,26 +21,7 @@ contract KINGs is ERC721, NwBTCNFT, Ownable , ReentrancyGuard {
 
     IERC20 public _nwBTCToken;
     address payable public _stakeAddress = address(0);
- 
-    function setTokenAddress( IERC20 _token ) public onlyOwner {
-        _nwBTCToken = _token;
-    }
-    
-    function setStakeAddress( address addr ) public onlyOwner {
-        _stakeAddress = payable( addr );
-    }
- 
-    function setBaseURI(string memory _base) onlyOwner external {
-        _baseURI = _base;
-    }
-   
-    function setAirdrop( address addr ) external {
-        airdrop[ addr ] = true;
-    }
-    
-    function getAirdrop( address addr ) external view returns(bool) {
-        return airdrop[ addr ];
-    }
+    uint256 public _price = 2000000000000000000000000;
     
     struct Collection {
         string name;
@@ -56,7 +37,13 @@ contract KINGs is ERC721, NwBTCNFT, Ownable , ReentrancyGuard {
     constructor( IERC20 _token ) ERC721("Sperm Kings", "KINGs") {
         _nwBTCToken = _token;    
     }
-    
+
+    ////////////////////////////////////////////////////////USER
+
+    function getAirdrop( address addr ) external view returns(bool) {
+        return airdrop[ addr ];
+    }
+   
     function walletOfOwner(address _wallet)
         external
         view
@@ -123,16 +110,10 @@ contract KINGs is ERC721, NwBTCNFT, Ownable , ReentrancyGuard {
             );
     }
 
-    uint256 public _price = 2000000000000000000000000;
-
-    function setPrice( uint256 v) external onlyOwner {
-        _price = v;
-    }
-    
     function getPrice() external view override returns(uint256){
         return _price;
     }
-
+    
     function canMint() external view override returns (bool){
         return ( ( ! (_stakeAddress == address( 0 ) ) ) && ( 0 < ( ( indexToCollection[ _collection.current() ].start + indexToCollection[ _collection.current() ].amount ) - _tokenIds.current() ) ) );
     }
@@ -162,23 +143,7 @@ contract KINGs is ERC721, NwBTCNFT, Ownable , ReentrancyGuard {
         return _hash;
     }
 
-    function setArtwork( uint256 _amount, string memory _name, string[] memory _urls )
-        external onlyOwner returns (uint256) {
-        
-        _collection.increment();
- 
-        Collection memory _struct = Collection({
-            name : _name,
-            start: _tokenIds.current(),
-            amount: _amount,
-            urls: _urls
-        });
-
-        indexToCollection[ _collection.current() ] = _struct;
-        return _collection.current();
-    }
-
-  function mint()
+   function mint()
        external
         nonReentrant
         override {
@@ -197,4 +162,46 @@ contract KINGs is ERC721, NwBTCNFT, Ownable , ReentrancyGuard {
         hashToMinted[ tokenIdToHash[ _tokenIds.current() ] ] = true;
         _mint(msg.sender, _tokenIds.current());
   }
+
+    ////////////////////////////////////////////////////////////OWNER
+ 
+    function setTokenAddress( IERC20 _token ) onlyOwner external {
+        _nwBTCToken = _token;
+    }
+    
+    function setStakeAddress( address addr ) onlyOwner external {
+        _stakeAddress = payable( addr );
+    }
+ 
+    function setBaseURI(string memory _base) onlyOwner external {
+        _baseURI = _base;
+    }
+   
+    function setAirdrop( address[] memory _recipients ) onlyOwner public returns (bool) {
+        for (uint i = 0; i < _recipients.length; i++) {
+            airdrop[ _recipients[ i ] ] = true;
+        }
+        return true;
+    }
+
+    function setPrice( uint256 v) onlyOwner external {
+        _price = v;
+    }
+    
+    function setArtwork( uint256 _amount, string memory _name, string[] memory _urls )
+        external onlyOwner returns (uint256) {
+        
+        _collection.increment();
+ 
+        Collection memory _struct = Collection({
+            name : _name,
+            start: _tokenIds.current(),
+            amount: _amount,
+            urls: _urls
+        });
+
+        indexToCollection[ _collection.current() ] = _struct;
+        return _collection.current();
+   }
+
 }

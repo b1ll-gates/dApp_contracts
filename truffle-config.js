@@ -3,7 +3,13 @@ const privateKeys = process.env.PRIVATE_KEYS || ""
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
 module.exports = {
-  networks: {
+  plugins: [
+    'truffle-plugin-verify'
+  ],
+  api_keys: {
+    bscscan: "CYY5QWY4S9H5EYW2V9DTY4D8ACQ6W1W1BW"
+  },
+   networks: {
     bsc_testnet: {
       provider: () => new HDWalletProvider(
         privateKeys.split(','),
@@ -27,10 +33,10 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: ">=0.4.11 <0.8.0",
+     version: ">=0.6.0 < 0.8.0",
       optimizer: {
         enabled: true,
-        runs: 200
+        runs: 400
       }
     }
   },
@@ -38,6 +44,7 @@ module.exports = {
         host: "127.0.0.1",
         port: 9545,
         network_id: "*",
+        gas: 6800000
    },
    develop: {
         port: 9545,
